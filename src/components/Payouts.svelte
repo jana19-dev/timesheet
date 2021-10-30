@@ -2,67 +2,57 @@
 	import { onMount } from 'svelte'
 	import { fly } from 'svelte/transition'
 
-	import { dataTimesheet } from '../utils/stores.js'
-	import { hoursInDayRangeRegular, hoursInDayRangeOT } from '../utils/calc.js'
+	import { dataPayouts, dataTimesheet } from '../utils/stores.js'
+	import { hoursInDaysRange, hoursInDaysRangeRegular, hoursInDaysRangeOT, daysInRange, calcPayRegular, calcPayOT } from '../utils/calc.js'
 
 	import { Timestamp, collection, getDocs, query, orderBy, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore'
 	import { db } from '../utils/firebase'
 
 	import DateEditor from './DateEditor.svelte'
-	import TimeEditor from './TimeEditor.svelte'
 
 	let isMounted = false
 	let isLoading = true
 	onMount(async () => {
-		const q = query(collection(db, 'days'), orderBy("date", "desc"))
+		const q = query(collection(db, 'payouts'), orderBy("start", "desc"))
 		const querySnapshot = await getDocs(q)
-		dataTimesheet.update(() => querySnapshot.docs.map(doc => ({...doc.data(), id: doc.id })))
+		dataPayouts.update(() => querySnapshot.docs.map(doc => ({...doc.data(), id: doc.id })))
 		isLoading = false
 		setTimeout(() => {
 			isMounted = true
 		}, 1000);
 	})
 
-	const onDateChange = (id, value) => {
+	const onDateChange = (field, id, value) => {
 		const updatedDate = new Date(value.replace(/-/g, '/'))
 		const newTimestamp = Timestamp.fromDate(updatedDate)
-		dataTimesheet.update(currentData => currentData.map(d => d.id === id ? {...d, date: newTimestamp} : d))
-		const firebaseRef = doc(db, "days", id)
-		updateDoc(firebaseRef, { date: newTimestamp })
-	}
-
-	const onTimeChange = (field, day, value) => {
-		const updatedDate = new Date(day.date.toDate().toDateString() + ' ' + value)
-		const newTimestamp = Timestamp.fromDate(updatedDate)
-		dataTimesheet.update(currentData => currentData.map(d => d.id === day.id ? {...d, [field]: newTimestamp} : d))
-		const firebaseRef = doc(db, "days", day.id)
+		dataPayouts.update(currentData => currentData.map(d => d.id === id ? {...d, [field]: newTimestamp} : d))
+		const firebaseRef = doc(db, "payouts", id)
 		updateDoc(firebaseRef, { [field]: newTimestamp })
 	}
 
 	const onDelete = (id) => {
-		if (confirm('Are you sure you want to delete this day?')) {
-			dataTimesheet.update(currentData => currentData.filter(d => d.id !== id))
-			const firebaseRef = doc(db, "days", id)
+		if (confirm('Are you sure you want to delete this payout?')) {
+			dataPayouts.update(currentData => currentData.filter(d => d.id !== id))
+			const firebaseRef = doc(db, "payouts", id)
 			deleteDoc(firebaseRef)
 		}
 	}
 
 	const onAddNew = async () => {
 		const newEntry = {
-			date: Timestamp.fromDate(new Date(new Date().toLocaleDateString().replace(/-/g, '/'))),
-			start: Timestamp.fromDate(new Date(new Date().toLocaleDateString().replace(/-/g, '/') + ' 10:00')),
-			end: Timestamp.fromDate(new Date(new Date().toLocaleDateString().replace(/-/g, '/') + ' 20:00'))
+			start: Timestamp.fromDate(new Date(new Date().toLocaleDateString().replace(/-/g, '/'))),
+			end: Timestamp.fromDate(new Date(new Date().toLocaleDateString().replace(/-/g, '/')))
 		}
-		const newEntryRef = await addDoc(collection(db, "days"), newEntry)
-		dataTimesheet.update(currentData => [{...newEntry, id: newEntryRef.id}, ...currentData])
+		const newEntryRef = await addDoc(collection(db, "payouts"), newEntry)
+		dataPayouts.update(currentData => [{...newEntry, id: newEntryRef.id}, ...currentData])
 	}
 
 	const onRefresh = async () => {
 		if (isMounted) {
 			isLoading = true
-			const q = query(collection(db, 'days'), orderBy("date", "desc"))
+			const q = query(collection(db, 'payouts'), orderBy("date", "desc"))
 			const querySnapshot = await getDocs(q)
-			dataTimesheet.update(() => querySnapshot.docs.map(doc => ({...doc.data(), id: doc.id })))
+			dataPayouts.update(() => querySnapshot.docs.map(doc => ({...doc.data(), id: doc.id })))
 			isLoading = false
 		}
 	}
@@ -77,7 +67,7 @@
 </script>
 
 <div>
-	<h2>Time Sheet</h2>
+	<h2>Estimated Payouts</h2>
 	<div class="actions">
 		<button class="add-new" on:click={onAddNew}><i class="fa fa-plus"></i> NEW</button>
 		<button class="add-new" on:click={onRefresh}>REFRESH <i class="fa fa-refresh"></i></button>
@@ -88,31 +78,40 @@
 	<table>
 		<thead>
 			<tr>
-				<th class="date">Date</th>
-				<th>In</th>
-				<th>Out</th>
-				<th class="hours">Hours</th>
-				<th class="hours">OT</th>
+				<th class="date">Start</th>
+				<th class="date">End</th>
+				<th class="numeric">Days</th>
+				<th class="numeric">Hours</th>
+				<th class="numeric">OT</th>
+				<th class="numeric">Pay</th>
+				<th class="numeric">Pay OT</th>
 				<th></th>
 			</tr>
 		</thead>
 		<tbody>
-			{#each $dataTimesheet as day (day.id)}
+			{#each $dataPayouts as day (day.id)}
 				<tr class:active-row={activeRow === day.id} on:mouseenter={() => addActiveRow(day.id)} on:mouseleave={removeActiveRow} out:fly="{{ x: 400, duration: 500 }}" in:fly="{isMounted && { y: -200, duration: 500 }}">
 					<td class="date">
-						<DateEditor date={day.date.toDate()} on:change={e => onDateChange(day.id, e.target.value)} />
+						<DateEditor date={day.start.toDate()} on:change={e => onDateChange('start', day.id, e.target.value)} />
 					</td>
-					<td>
-						<TimeEditor date={day.start.toDate()} on:change={e => onTimeChange('start', day, e.target.value)} />
+					<td class="date">
+						<DateEditor date={day.end.toDate()} on:change={e => onDateChange('end', day.id, e.target.value)} />
 					</td>
-					<td>
-						<TimeEditor date={day.end.toDate()} on:change={e => onTimeChange('end', day, e.target.value)} />
+					<td class="numeric">
+						{daysInRange($dataTimesheet, day.start, day.end)}
 					</td>
-					<td class="hours">
-						{hoursInDayRangeRegular(day.start, day.end)}
+					<td class="numeric">
+						{hoursInDaysRangeRegular($dataTimesheet, day.start, day.end)}
 					</td>
-					<td class="hours">
-						{hoursInDayRangeOT(day.start, day.end)}
+					<td class="numeric">
+						{hoursInDaysRangeOT($dataTimesheet, day.start, day.end)}
+					</td>
+					<td class="numeric">
+						{calcPayRegular(hoursInDaysRange($dataTimesheet, day.start, day.end), daysInRange($dataTimesheet, day.start, day.end))}
+					</td>
+					<td class="numeric">
+						{calcPayOT(hoursInDaysRange($dataTimesheet, day.start, day.end), daysInRange($dataTimesheet, day.start, day.end))}
+					</td>
 					<td>
 						<button class="delete" on:click={() => onDelete(day.id)}>
 							<i class="fa fa-trash"></i>
@@ -127,7 +126,8 @@
 	h2 {
 		text-align: center;
 		margin: 0.5rem;
-		color: #009879;
+		color: rgb(102, 16, 201);
+
 	}
 
 	.loading {
@@ -154,7 +154,7 @@
 	}
 
 	thead tr {
-    background-color: #009879;
+    background-color: rgb(102, 16, 201);
     color: #ffffff;
     text-align: left;
 	}
@@ -169,7 +169,7 @@
 	}
 
 	tbody tr:last-of-type {
-    border-bottom: 2px solid #009879;
+    border-bottom: 2px solid rgb(102, 16, 201);
 	}
 
 	tbody tr.active-row {
@@ -180,11 +180,11 @@
 		text-align: left;
 	}
 
-	.hours {
+	.numeric {
 		text-align: end;
 	}
 
-	td.hours {
+	td.numeric {
 		font-weight: bold;
 	}
 
@@ -204,7 +204,7 @@
 		cursor: pointer;
 		font-size: 1rem;
 		font-weight: bold;
-		color: #009879;
+		color: rgb(102, 16, 201);
 		margin: none;
 	}
 </style>
