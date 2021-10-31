@@ -7,11 +7,17 @@
   const handleClickOutside = () => {
 		isEditing = false
 	}
+
+  const onKeyPress = e => {
+    if (['Enter', 'Escape'].includes(e.key)) {
+      isEditing = false
+    }
+  }
 </script>
 
 <div on:dblclick={() => isEditing = !isEditing} use:clickOutside on:click_outside={handleClickOutside}>
   {#if isEditing}
-    <input type="date" value={date.toLocaleDateString('en-ca')} on:change />
+    <input type="date" value={date.toLocaleDateString('en-ca')} on:change on:keyup={onKeyPress} />
   {:else}
     {date.toDateString()}
   {/if}
