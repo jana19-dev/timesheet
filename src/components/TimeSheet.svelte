@@ -88,42 +88,46 @@
 	{#if isLoading}
 		<div class="loading">Loading...</div>
 	{/if}
-	<table>
-		<thead>
-			<tr>
-				<th class="date">Date</th>
-				<th>In</th>
-				<th>Out</th>
-				<th class="hours">Hours</th>
-				<th class="hours">OT</th>
-				<th></th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each $dataTimesheet as day (day.id)}
-				<tr class:active-row={activeRow === day.id} on:mouseenter={() => addActiveRow(day.id)} on:mouseleave={removeActiveRow} out:fly="{{ x: 400, duration: 500 }}" in:fly="{isMounted && { y: -200, duration: 500 }}">
-					<td class="date">
-						<DateEditor date={day.date.toDate()} on:change={e => onDateChange(day.id, e.target.value)} />
-					</td>
-					<td>
-						<TimeEditor date={day.start.toDate()} on:change={e => onTimeChange('start', day, e.target.value)} />
-					</td>
-					<td>
-						<TimeEditor date={day.end.toDate()} on:change={e => onTimeChange('end', day, e.target.value)} />
-					</td>
-					<td class="hours">
-						{hoursInDayRangeRegular(day)}
-					</td>
-					<td class="hours">
-						{hoursInDayRangeOT(day)}
-					<td>
-						<button class="delete" on:click={() => onDelete(day.id)}>
-							<i class="fa fa-trash"></i>
-						</button>
-					</td>
-				</tr>
-			{/each}
-	</table>
+	<div id="table-wrapper">
+  	<div id="table-scroll">
+			<table>
+				<thead>
+					<tr>
+						<th class="date">Date</th>
+						<th>In</th>
+						<th>Out</th>
+						<th class="hours">Hours</th>
+						<th class="hours">OT</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					{#each $dataTimesheet as day (day.id)}
+						<tr class:active-row={activeRow === day.id} on:mouseenter={() => addActiveRow(day.id)} on:mouseleave={removeActiveRow} out:fly="{{ x: 400, duration: 500 }}" in:fly="{isMounted && { y: -200, duration: 500 }}">
+							<td class="date">
+								<DateEditor date={day.date.toDate()} on:change={e => onDateChange(day.id, e.target.value)} />
+							</td>
+							<td>
+								<TimeEditor date={day.start.toDate()} on:change={e => onTimeChange('start', day, e.target.value)} />
+							</td>
+							<td>
+								<TimeEditor date={day.end.toDate()} on:change={e => onTimeChange('end', day, e.target.value)} />
+							</td>
+							<td class="hours">
+								{hoursInDayRangeRegular(day)}
+							</td>
+							<td class="hours">
+								{hoursInDayRangeOT(day)}
+							<td>
+								<button class="delete" on:click={() => onDelete(day.id)}>
+									<i class="fa fa-trash"></i>
+								</button>
+							</td>
+						</tr>
+					{/each}
+			</table>
+		</div>
+	</div>
 </div>
 
 <style>
@@ -144,6 +148,21 @@
 		display: flex;
 		justify-content: space-between;
 		margin: 0.5rem;
+	}
+
+	#table-wrapper {
+		position:relative;
+	}
+
+	#table-scroll {
+		height: calc(100vh - 5rem);
+		overflow:auto;
+	}
+
+	th {
+    background-color: #009879;
+  	position: sticky;
+ 	 	top: 0;
 	}
 
 	table {
