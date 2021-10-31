@@ -50,7 +50,7 @@
 	const onRefresh = async () => {
 		if (isMounted) {
 			isLoading = true
-			const q = query(collection(db, 'payouts'), orderBy("date", "desc"))
+			const q = query(collection(db, 'payouts'), orderBy("start", "desc"))
 			const querySnapshot = await getDocs(q)
 			dataPayouts.update(() => querySnapshot.docs.map(doc => ({...doc.data(), id: doc.id })))
 			isLoading = false
