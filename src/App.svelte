@@ -4,13 +4,13 @@
 	import TimeSheet from './components/TimeSheet.svelte'
 	import Payouts from './components/Payouts.svelte'
 
-	// onMount(() => {
-	// 	// show basic password prompt: MUCH SECURE; SUCH WOW
-	// 	let password = prompt('Enter password')
-	// 	while (password !== 'batman') {
-	// 		password = prompt('Enter password')
-	// 	}
-	// })
+	onMount(() => {
+		// show basic password prompt: MUCH SECURE; SUCH WOW
+		let password = prompt('Enter password')
+		while (password !== 'batman') {
+			password = prompt('Enter password')
+		}
+	})
 </script>
 
 <main>
