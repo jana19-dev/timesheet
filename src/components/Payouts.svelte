@@ -158,7 +158,7 @@
 		text-align: center;
 		font-weight: bold;
 		margin: 0.5rem;
-		color: rgb(10, 168, 155);
+		color: rgb(102, 16, 201);
 	}
 
 	.actions {
