@@ -34,9 +34,12 @@
 	const onTimeChange = (field, day, value) => {
 		const updatedDate = new Date(day.date.toDate().toDateString() + ' ' + value)
 		const newTimestamp = Timestamp.fromDate(updatedDate)
-		dataTimesheet.update(currentData => currentData.map(d => d.id === day.id ? {...d, [field]: newTimestamp} : d))
+		const otherField = field === 'start' ? 'end' : 'start'
+		const otherUpdatedDate = new Date(day.date.toDate().toDateString() + ' ' + day[otherField].toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }))
+		const otherNewTimestamp = Timestamp.fromDate(otherUpdatedDate)
+		dataTimesheet.update(currentData => currentData.map(d => d.id === day.id ? {...d, [field]: newTimestamp, [otherField]: otherNewTimestamp} : d))
 		const firebaseRef = doc(db, "days", day.id)
-		updateDoc(firebaseRef, { [field]: newTimestamp })
+		updateDoc(firebaseRef, { [field]: newTimestamp, [otherField]: otherNewTimestamp })
 	}
 
 	const onDelete = (id) => {

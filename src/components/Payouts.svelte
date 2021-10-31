@@ -113,12 +113,10 @@
 						{hoursInDaysRangeOT($dataTimesheet, day)}
 					</td>
 					<td class="numeric bold">
-						{calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+						{parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
 					</td>
 					<td class="numeric bold">
-						{calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
-.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+						{parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
 					</td>
 					<td class="numeric bold">
 						{((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day)))) * 0.04).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
