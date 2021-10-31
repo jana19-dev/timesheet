@@ -1,6 +1,3 @@
-import { Timestamp, collection, getDocs, query, orderBy, where, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore'
-import { db } from './firebase'
-
 export const hoursInDayRange = (start, end) => ((end.toDate() - start.toDate()) / 3600000).toFixed(2)
 
 export const hoursInDaysRange = (data, start, end) => {
@@ -9,44 +6,61 @@ export const hoursInDaysRange = (data, start, end) => {
   return totalHours
 }
 
-export const hoursInDayRangeRegular = (start, end) => {
+export const hoursInDayRangeRegular = ({date, start, end}) => {
   const hours = hoursInDayRange(start, end)
-  return hours > 8 ? 8.00.toFixed(2) : hours
+  if ([0, 6].includes(date.toDate().getDay())) {
+    return hours > 4 ? 4.00.toFixed(2) : hours
+  } else {
+    return hours > 8 ? 8.00.toFixed(2) : hours
+  }
 }
 
-export const hoursInDayRangeOT = (start, end) => {
+export const hoursInDayRangeOT = ({date, start, end}) => {
   const hours = hoursInDayRange(start, end)
-  return hours > 8 ? (hours - 8).toFixed(2) : '-'
+  if ([0, 6].includes(date.toDate().getDay())) {
+    return hours > 4 ? (hours - 4).toFixed(2) : '-'
+  } else {
+    return hours > 8 ? (hours - 8).toFixed(2) : '-'
+  }
 }
 
-export const hoursInDaysRangeRegular = (data, start, end) => {
-  const hours = hoursInDaysRange(data, start, end)
-  const days = daysInRange(data, start, end)
-  const maxHours = days * 8
-  return hours > maxHours ? maxHours : hours
-}
-
-export const hoursInDaysRangeOT = (data, start, end) => {
-  const hours = hoursInDaysRange(data, start, end)
-  const days = daysInRange(data, start, end)
-  const maxHours = days * 8
-  return hours > maxHours ? (hours - maxHours) : '-'
-}
-
-
-export const daysInRange = (data, start, end) => {
+export const daysInRange = (data, {start, end}) => {
   const dataInRange = data.filter(d => d.date.seconds >= start.seconds && d.date.seconds <= end.seconds)
   return dataInRange.length
 }
 
-export const calcPayRegular = (hours, days) => {
-  const overtimeHours = hours - (days * 8)
-  const normalPay = (hours - overtimeHours) * 18
-  return normalPay.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+export const maxHoursInDaysRange = (data, {start, end}) => {
+  let maxHours = 0
+  const dataInRange = data.filter(d => d.date.seconds >= start.seconds && d.date.seconds <= end.seconds)
+  for (const { date } of dataInRange) {
+    if ([0, 6].includes(date.toDate().getDay())) {
+      maxHours += 4
+    } else {
+      maxHours += 8
+    }
+  }
+  return maxHours
 }
 
-export const calcPayOT = (hours, days) => {
-  const overtimeHours = hours - (days * 8)
-  const overtimePay = overtimeHours * 18 * 1.5
-  return overtimePay.toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+export const hoursInDaysRangeRegular = (data, {start, end}) => {
+  const hours = hoursInDaysRange(data, start, end)
+  const maxHours = maxHoursInDaysRange(data, {start, end})
+  return hours > maxHours ? maxHours.toFixed(2) : hours
+}
+
+export const hoursInDaysRangeOT = (data, {start, end}) => {
+  const hours = hoursInDaysRange(data, start, end)
+  const maxHours = maxHoursInDaysRange(data, {start, end})
+  return hours > maxHours ? (hours - maxHours).toFixed(2) : 0
+}
+
+export const calcPayRegular = (hours, maxHours) => {
+  const overtimeHours = hours - maxHours
+  const normalPay = (hours - overtimeHours) * 18
+  return parseFloat(normalPay).toFixed(2)
+}
+
+export const calcPayOT = (hours, maxHours) => {
+  const overtimePay = hours * 18 * 1.5
+  return parseFloat(overtimePay).toFixed(2)
 }

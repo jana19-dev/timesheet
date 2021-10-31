@@ -109,10 +109,10 @@
 						<TimeEditor date={day.end.toDate()} on:change={e => onTimeChange('end', day, e.target.value)} />
 					</td>
 					<td class="hours">
-						{hoursInDayRangeRegular(day.start, day.end)}
+						{hoursInDayRangeRegular(day)}
 					</td>
 					<td class="hours">
-						{hoursInDayRangeOT(day.start, day.end)}
+						{hoursInDayRangeOT(day)}
 					<td>
 						<button class="delete" on:click={() => onDelete(day.id)}>
 							<i class="fa fa-trash"></i>

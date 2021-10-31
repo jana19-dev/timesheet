@@ -13,7 +13,7 @@
 		height: 100vh;
 		display: grid;
 		grid-gap: 2rem;
-		grid-template-columns: 1fr 1.5fr;
+		grid-template-columns: 1fr 2fr;
 		overflow-y: auto;
 		padding: 0 1rem;
 	}

@@ -3,7 +3,7 @@
 	import { fly } from 'svelte/transition'
 
 	import { dataPayouts, dataTimesheet } from '../utils/stores.js'
-	import { hoursInDaysRange, hoursInDaysRangeRegular, hoursInDaysRangeOT, daysInRange, calcPayRegular, calcPayOT } from '../utils/calc.js'
+	import { hoursInDaysRange, hoursInDaysRangeRegular, hoursInDaysRangeOT, daysInRange, maxHoursInDaysRange, calcPayRegular, calcPayOT } from '../utils/calc.js'
 
 	import { Timestamp, collection, getDocs, query, orderBy, doc, addDoc, updateDoc, deleteDoc } from 'firebase/firestore'
 	import { db } from '../utils/firebase'
@@ -84,7 +84,13 @@
 				<th class="numeric">Hours</th>
 				<th class="numeric">OT</th>
 				<th class="numeric">Pay</th>
-				<th class="numeric">Pay OT</th>
+				<th class="numeric">OT</th>
+				<th class="numeric">Vacay</th>
+				<th class="numeric">Gross</th>
+				<th class="numeric">CPP</th>
+				<th class="numeric">EI</th>
+				<th class="numeric">Tax</th>
+				<th class="numeric">Net</th>
 				<th></th>
 			</tr>
 		</thead>
@@ -98,19 +104,39 @@
 						<DateEditor date={day.end.toDate()} on:change={e => onDateChange('end', day.id, e.target.value)} />
 					</td>
 					<td class="numeric">
-						{daysInRange($dataTimesheet, day.start, day.end)}
+						{daysInRange($dataTimesheet, day)}
 					</td>
 					<td class="numeric">
-						{hoursInDaysRangeRegular($dataTimesheet, day.start, day.end)}
+						{hoursInDaysRangeRegular($dataTimesheet, day)}
 					</td>
 					<td class="numeric">
-						{hoursInDaysRangeOT($dataTimesheet, day.start, day.end)}
+						{hoursInDaysRangeOT($dataTimesheet, day)}
 					</td>
-					<td class="numeric">
-						{calcPayRegular(hoursInDaysRange($dataTimesheet, day.start, day.end), daysInRange($dataTimesheet, day.start, day.end))}
+					<td class="numeric bold">
+						{calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
 					</td>
-					<td class="numeric">
-						{calcPayOT(hoursInDaysRange($dataTimesheet, day.start, day.end), daysInRange($dataTimesheet, day.start, day.end))}
+					<td class="numeric bold">
+						{calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })
+.toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+					</td>
+					<td class="numeric bold">
+						{((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day)))) * 0.04).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+					</td>
+					<td class="numeric bold">
+						{(parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + ((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day)))) * 0.04)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+					</td>
+					<td class="numeric bold negative">
+						{((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + ((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day)))) * 0.04)) * 0.0513).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+					</td>
+					<td class="numeric bold negative">
+						{((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + ((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day)))) * 0.04)) * 0.0158).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+					</td>
+					<td class="numeric bold negative">
+						{((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + ((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day)))) * 0.04)) * 0.169906680620).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
+					</td>
+					<td class="numeric bold net">
+						{((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + ((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day)))) * 0.04)) - ((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + ((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day)))) * 0.04)) * 0.0513) - ((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + ((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day)))) * 0.04)) * 0.0158) - ((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + ((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day)))) * 0.04)) * 0.169906680620)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
 					</td>
 					<td>
 						<button class="delete" on:click={() => onDelete(day.id)}>
@@ -184,7 +210,21 @@
 		text-align: end;
 	}
 
-	td.numeric {
+	.negative {
+		color: rgb(185, 138, 9);
+	}
+
+	.net {
+		color: rgb(8, 131, 121);
+		font-weight: bolder;
+		font-size: 16px;
+	}
+
+	.negative:before {
+		content: '-';
+	}
+
+	td.bold {
 		font-weight: bold;
 	}
 
