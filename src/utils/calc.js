@@ -8,11 +8,12 @@ export const hoursInDaysRange = (data, start, end) => {
 
 export const hoursInDayRangeRegular = ({date, start, end}) => {
   const hours = hoursInDayRange(start, end)
-  if ([0, 6].includes(date.toDate().getDay())) {
-    return hours > 4 ? 4.00.toFixed(2) : hours
-  } else {
-    return hours > 8 ? 8.00.toFixed(2) : hours
-  }
+  return hours
+  // if ([0, 6].includes(date.toDate().getDay())) {
+  //   return hours > 4 ? 4.00.toFixed(2) : hours
+  // } else {
+  //   return hours > 8 ? 8.00.toFixed(2) : hours
+  // }
 }
 
 export const hoursInDayRangeOT = ({date, start, end}) => {
@@ -30,16 +31,17 @@ export const daysInRange = (data, {start, end}) => {
 }
 
 export const maxHoursInDaysRange = (data, {start, end}) => {
-  let maxHours = 0
-  const dataInRange = data.filter(d => d.date.seconds >= start.seconds && d.date.seconds <= end.seconds)
-  for (const { date } of dataInRange) {
-    if ([0, 6].includes(date.toDate().getDay())) {
-      maxHours += 4
-    } else {
-      maxHours += 8
-    }
-  }
-  return maxHours
+  return 88 // 2 weeks
+  // let maxHours = 0
+  // const dataInRange = data.filter(d => d.date.seconds >= start.seconds && d.date.seconds <= end.seconds)
+  // for (const { date } of dataInRange) {
+  //   if ([0, 6].includes(date.toDate().getDay())) {
+  //     maxHours += 4
+  //   } else {
+  //     maxHours += 8
+  //   }
+  // }
+  // return maxHours
 }
 
 export const hoursInDaysRangeRegular = (data, {start, end}) => {

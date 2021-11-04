@@ -123,7 +123,7 @@
 							<td class="numeric bold">
 								{((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day)))) * 0.04).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
 							</td>
-							<td class="numeric bold">
+							<td class="numeric bold net">
 								{(parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + ((parseFloat(calcPayRegular(hoursInDaysRangeRegular($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day))) + parseFloat(calcPayOT(hoursInDaysRangeOT($dataTimesheet, day), maxHoursInDaysRange($dataTimesheet, day)))) * 0.04)).toLocaleString('en-US', { style: 'currency', currency: 'USD' })}
 							</td>
 							<td class="numeric bold negative">

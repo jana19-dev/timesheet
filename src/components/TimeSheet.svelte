@@ -97,7 +97,6 @@
 						<th>In</th>
 						<th>Out</th>
 						<th class="hours">Hours</th>
-						<th class="hours">OT</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -116,8 +115,6 @@
 							<td class="hours">
 								{hoursInDayRangeRegular(day)}
 							</td>
-							<td class="hours">
-								{hoursInDayRangeOT(day)}
 							<td>
 								<button class="delete" on:click={() => onDelete(day.id)}>
 									<i class="fa fa-trash"></i>
